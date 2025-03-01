@@ -8,72 +8,47 @@ public class FloatBinaryNumber : BinaryNumber
     private int _power;
     public int[] ConvertToStraightBinary(float number)
     {
-        Reset(); 
-        
+        Reset();
+
         _number[0] = number < 0 ? 1 : 0;
-        
+
         int integerPart = Math.Abs((int)number);
-        for (int i = BitSize/4-1; i > 0 && integerPart > 0; i--)
+        for (int i = BitSize / 4 - 1; i > 0 && integerPart > 0; i--)
         {
             _number[i] = integerPart % 2;
             integerPart /= 2;
         }
-        
-        float fractionalPart = Math.Abs(number) - (int)Math.Abs(number); 
-        for (int i = BitSize/4; i < BitSize && fractionalPart > 0; i++)
+
+        float fractionalPart = Math.Abs(number) - (int)Math.Abs(number);
+        for (int i = BitSize / 4; i < BitSize && fractionalPart > 0; i++)
         {
-            fractionalPart *= 2; 
-            _number[i] = (int)fractionalPart; 
+            fractionalPart *= 2;
+            _number[i] = (int)fractionalPart;
             if (fractionalPart >= 1)
             {
                 fractionalPart -= 1;
             }
         }
-        
-        int powerExp = 0;
-        
-        if(_number.Take(8).Sum() > 0)
-            while (_number.Take(8).Sum() > 1 || _number[7] != 1)
-            {
-                MoveBitsToRight(this,1);
-                powerExp++;
-            }
-        else
-            while (_number.Take(8).Sum() <= 0 || _number[7] != 1)
-            {
-                MoveBitsToLeft(this,1);
-                powerExp--;
-            }
-        
-        int power = BinShift + powerExp;
-        
-        BinaryNumber powerBin = new BinaryNumber();
-        powerBin.ConvertToStraightBinary(power);
-        
-        int[] powerBinShortened = new int[PowerBinShortenedSize];
-        powerBinShortened[0] = powerBin.Number[0];
-        for (int i = BitSize - 1; i >= BitSize - PowerBinShortenedSize; i--)
-        {
-            powerBinShortened[i - (BitSize-PowerBinShortenedSize)] = powerBin.Number[i];
-        }
-        
-        int[] mantissa = new int[MantissaSize]; 
 
-        for (int i = BitSize /4; i < BitSize-1; i++)
+        int[] exponentPart = FindExponent(out int power);
+        exponentPart.CopyTo(_number, 1);
+
+        int[] mantissa = new int[MantissaSize];
+        for (int i = BitSize / 4; i < BitSize - 1; i++)
         {
-            mantissa[i-BitSize/4] = _number[i];
+            mantissa[i - BitSize / 4] = _number[i];
         }
+
+        mantissa.CopyTo(_number, PowerBinShortenedSize + 1);
 
         if (number < 0)
-            _number[0] = 1;  
-        powerBinShortened.CopyTo(_number, 1);
-        mantissa.CopyTo(_number, PowerBinShortenedSize+1);
+            _number[0] = 1;
 
         _power = power;
         _state = NumberState.Straight;
         return _number;
     }
-    
+
     public float GetDecimal()
     {
         switch (_state)
@@ -175,6 +150,38 @@ public class FloatBinaryNumber : BinaryNumber
         }
         
         return result;
+    }
+
+    private int[] FindExponent(out int power)
+    {
+        int powerExp = 0;
+
+        if (_number.Take(8).Sum() > 0)
+            while (_number.Take(8).Sum() > 1 || _number[7] != 1)
+            {
+                MoveBitsToRight(this, 1);
+                powerExp++;
+            }
+        else
+            while (_number.Take(8).Sum() <= 0 || _number[7] != 1)
+            {
+                MoveBitsToLeft(this, 1);
+                powerExp--;
+            }
+
+        power = BinShift + powerExp;
+
+        BinaryNumber powerBin = new BinaryNumber();
+        powerBin.ConvertToStraightBinary(power);
+
+        int[] powerBinShortened = new int[PowerBinShortenedSize];
+        powerBinShortened[0] = powerBin.Number[0];
+        for (int i = BitSize - 1; i >= BitSize - PowerBinShortenedSize; i--)
+        {
+            powerBinShortened[i - (BitSize - PowerBinShortenedSize)] = powerBin.Number[i];
+        }
+
+        return powerBinShortened;
     }
     
 }

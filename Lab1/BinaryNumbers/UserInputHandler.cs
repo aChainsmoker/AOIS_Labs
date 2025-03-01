@@ -56,7 +56,7 @@ public class UserInputHandler
                     FloatBinaryNumber number3 = number1 + number2;
                     solutionBinary = string.Join("", number3.Number);
                     solutionBinary = solutionBinary.Insert(1, " ");
-                    solutionBinary = solutionBinary.Insert(9, " ");
+                    solutionBinary = solutionBinary.Insert(10, " ");
                     solutionDecimal = number3.GetDecimal().ToString(CultureInfo.CurrentCulture);
                 }
                 else
