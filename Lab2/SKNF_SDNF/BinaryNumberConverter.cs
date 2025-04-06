@@ -3,11 +3,11 @@
 public static  class BinaryNumberConverter
 {
     
-    public static int GetDecimalFromStraight(List<int> number)
+    public static long GetDecimalFromBinary(List<int> number)
     {
                     
-        int magnitude = 0;
-        int power = 1; 
+        long magnitude = 0;
+        long power = 1; 
                     
         for (int i =number.Count-1; i >= 0; i--)
         {
@@ -20,7 +20,7 @@ public static  class BinaryNumberConverter
         return magnitude;
     }
     
-    public static List<int> ConvertToStraightBinary(int number, int size)
+    public static List<int> ConvertToBinary(int number, int size)
     {
         List<int> binaryNumber = new List<int>();
         for (int i = size-1; Math.Abs(number) > 0; i--)

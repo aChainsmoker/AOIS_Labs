@@ -8,11 +8,11 @@ public static class CaseGenerator
         List<int> firstCase = new List<int>();
         for (int i = 0; i < size; i++)
             firstCase.Add(1);
-        int maxValue = BinaryNumberConverter.GetDecimalFromStraight(firstCase);
+        int maxValue = (int)BinaryNumberConverter.GetDecimalFromBinary(firstCase);
 
         for (int i = maxValue; i >= 0; i--)
         {
-            cases.Add(BinaryNumberConverter.ConvertToStraightBinary(i, size));
+            cases.Add(BinaryNumberConverter.ConvertToBinary(i, size));
         }
 
         cases.Reverse();

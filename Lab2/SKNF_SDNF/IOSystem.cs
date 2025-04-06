@@ -54,7 +54,7 @@ public static class IOSystem
         Console.WriteLine("\nСДНФ: " + sdnf);
     }
 
-    public static void PrintIndexForm(int indexForm, string indexBinaryForm)
+    public static void PrintIndexForm(long indexForm, string indexBinaryForm)
     {
         Console.WriteLine("\nИндексная форма: " + indexForm + " = " + indexBinaryForm + "\n");
     }

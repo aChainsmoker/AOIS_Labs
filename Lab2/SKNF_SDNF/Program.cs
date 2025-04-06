@@ -19,7 +19,7 @@ class Program
             string sdnf;
             List<int> numberFormSknf;
             List<int> numberFormSdnf;
-            int indexForm;
+            long indexForm;
             string indexBinaryForm;
             try
             {
@@ -28,7 +28,7 @@ class Program
                 subformulas = parser.FindSubformulas(reformedFormula);
                 sknf = SknfSdnfFinder.FindSKNF(cases, parser, reformedFormula, out numberFormSknf);
                 sdnf = SknfSdnfFinder.FindSDNF(cases, parser, reformedFormula, out numberFormSdnf);
-                indexForm = BinaryNumberConverter.GetDecimalFromStraight(
+                indexForm = BinaryNumberConverter.GetDecimalFromBinary(
                     SknfSdnfFinder.ExtractBinaryForm(cases, parser, reformedFormula));
                 indexBinaryForm = string.Join("", SknfSdnfFinder.ExtractBinaryForm(cases, parser, reformedFormula));
                 IOSystem.FormTable(cases, subformulas, reformedFormula, parser);
