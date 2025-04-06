@@ -1,4 +1,6 @@
-﻿namespace SKNF_SDNF_Minimizer;
+﻿using SKNF_SDNF;
+
+namespace SKNF_SDNF_Minimizer;
 
 class Program
 {
@@ -8,25 +10,34 @@ class Program
     {
         while (true)
         {
-            int sknfOrSdnf = IOSystem.ChooseFormulaType();
             string formula = IOSystem.TakeTheInput();
+            if(formula == "exit")
+                break;
+            
+            InputParser parser = new InputParser();
             Minimizer minimizer = new Minimizer();
+            List<List<int>> cases;
+            string reformedFormula;
+            string sknf;
+            string sdnf;
 
             try
             {
-                if (sknfOrSdnf == 1)
-                {
-                    IOSystem.PrintSDNFCalculatingMethod(minimizer.MinimizeSDNFByCalculating(formula));
-                    IOSystem.PrintSDNFTableCalculatingMethod(minimizer.MinimizeSDNFByTableAndCalculating(formula));
-                    IOSystem.PrintSDNFTableMethod(minimizer.MinimizeSDNFByKarnaugh(formula));
-                }
-                else
-                {
-                    IOSystem.PrintSKNFCalculatingMethod(minimizer.MinimizeSKNFByCalculating(formula));
-                    IOSystem.PrintSKNFTableCalculatingMethod(minimizer.MinimizeSKNFByTableAndCalculating(formula));
-                    IOSystem.PrintSKNFTableMethod(minimizer.MinimizeSKNFByKarnaugh(formula));
-                }
-        
+                reformedFormula = parser.ReformFormula(formula);
+                cases = CaseGenerator.GenerateCases(parser.Letters.Count);
+                sknf = SknfSdnfFinder.FindSKNF(cases, parser, reformedFormula, out _);
+                sdnf = SknfSdnfFinder.FindSDNF(cases, parser, reformedFormula, out _);
+                
+                SKNF_SDNF.IOSystem.PrintSdnf(sdnf);
+                IOSystem.PrintSDNFCalculatingMethod(minimizer.MinimizeSDNFByCalculating(sdnf));
+                IOSystem.PrintSDNFTableCalculatingMethod(minimizer.MinimizeSDNFByTableAndCalculating(sdnf));
+                IOSystem.PrintSDNFTableMethod(minimizer.MinimizeSDNFByKarnaugh(sdnf));
+                
+                
+                SKNF_SDNF.IOSystem.PrintSknf(sknf);
+                IOSystem.PrintSKNFCalculatingMethod(minimizer.MinimizeSKNFByCalculating(sknf));
+                IOSystem.PrintSKNFTableCalculatingMethod(minimizer.MinimizeSKNFByTableAndCalculating(sknf));
+                IOSystem.PrintSKNFTableMethod(minimizer.MinimizeSKNFByKarnaugh(sknf));
             }
             catch 
             {

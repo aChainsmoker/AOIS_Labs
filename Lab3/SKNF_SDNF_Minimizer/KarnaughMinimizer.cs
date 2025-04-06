@@ -9,7 +9,7 @@ public partial class Minimizer
         List<List<string>> parsedSDNF = ParseFormule(sdnf);
         List<char> variableOrder = GetVariableOrder(parsedSDNF); 
         int n = variableOrder.Count;
-        if (n > 4) throw new ArgumentException("Поддерживается до 4 переменных");
+        if (n > 4) throw new ArgumentException("Supported up to 4 variables");
 
         List<List<int>> cases = CaseGenerator.GenerateCases(n);
         var casesValuesPairs = FindSDNFValues(cases, parsedSDNF, variableOrder);
@@ -103,7 +103,7 @@ public partial class Minimizer
             int b = values[1];
             return GetGrayCode((a << 1) | b);
         }
-        throw new ArgumentException("Недопустимое количество переменных");
+        throw new ArgumentException("Unsupported amount of Variable");
     }
 
     private int GetColIndex(List<int> values, int n)
@@ -122,7 +122,7 @@ public partial class Minimizer
             int d = values[3];
             return GetGrayCode((c << 1) | d);
         }
-        throw new ArgumentException("Недопустимое количество переменных");
+        throw new ArgumentException("Unsupported amount of Variable");
     }
 
     private List<List<int>> FindKarnaughGroups(int[,] kmap, int targetValue, int n)
