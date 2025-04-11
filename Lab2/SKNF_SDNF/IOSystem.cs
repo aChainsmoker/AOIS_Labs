@@ -59,7 +59,7 @@ public static class IOSystem
         Console.WriteLine("\nИндексная форма: " + indexForm + " = " + indexBinaryForm + "\n");
     }
 
-    public static string? TakeTheInput()
+    public static string TakeTheInput()
     {
         Console.WriteLine("Введите формулу: ");
         return Console.ReadLine();

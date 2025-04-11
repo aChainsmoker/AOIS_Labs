@@ -46,21 +46,20 @@ public static class IOSystem
     
     public static void PrintKarnaughMap(int[,] kMap)
     {
-        // Определяем размеры массива
         int rows = kMap.GetLength(0);
         int cols = kMap.GetLength(1);
 
-        // Проверяем, поддерживается ли размер карты
         if (!((rows == 1 && cols == 2) || (rows == 2 && cols == 2) || 
-              (rows == 2 && cols == 4) || (rows == 4 && cols == 4)))
+              (rows == 2 && cols == 4) || (rows == 4 && cols == 4) || 
+              (rows == 4 && cols == 8)))
         {
             throw new ArgumentException("Неподдерживаемый размер карты Карно");
         }
 
         Console.WriteLine("Карта Карно:");
 
-        // Генерируем заголовки для столбцов
-        string[] colHeaders = GenerateColumnHeaders(cols);
+        int colVars = cols == 2 ? 1 : (cols == 4 ? 2 : 3);
+        string[] colHeaders = GenerateColumnHeaders(cols, colVars);
         Console.Write("       ");
         foreach (var header in colHeaders)
         {
@@ -68,10 +67,8 @@ public static class IOSystem
         }
         Console.WriteLine();
 
-        // Генерируем заголовки для строк
-        string[] rowHeaders = GenerateRowHeaders(rows);
-
-        // Выводим каждую строку карты с заголовком строки
+        int rowVars = rows == 1 ? 0 : (rows == 2 ? 1 : 2);
+        string[] rowHeaders = GenerateRowHeaders(rows, rowVars);
         for (int i = 0; i < rows; i++)
         {
             Console.Write($"{rowHeaders[i],4} |");
@@ -83,26 +80,26 @@ public static class IOSystem
         }
     }
 
-// Вспомогательный метод для генерации заголовков столбцов
-    private static string[] GenerateColumnHeaders(int cols)
+    private static string[] GenerateColumnHeaders(int cols, int varCount)
     {
         if (cols == 2)
-            return new[] { "0", "1" }; // Для 1 или 2 переменных
+            return new[] { "0", "1" };
         else if (cols == 4)
-            return new[] { "00", "01", "11", "10" }; // Для 3 или 4 переменных (Греевский код)
+            return new[] { "00", "01", "11", "10" };
+        else if (cols == 8)
+            return new[] { "000", "001", "011", "010", "110", "111", "101", "100" };
         else
             throw new ArgumentException("Неподдерживаемое количество столбцов");
     }
 
-// Вспомогательный метод для генерации заголовков строк
-    private static string[] GenerateRowHeaders(int rows)
+    private static string[] GenerateRowHeaders(int rows, int varCount)
     {
         if (rows == 1)
-            return new[] { "" }; // Для 1 переменной заголовок строки не нужен
+            return new[] { "" };
         else if (rows == 2)
-            return new[] { "0", "1" }; // Для 2 или 3 переменных
+            return new[] { "0", "1" };
         else if (rows == 4)
-            return new[] { "00", "01", "11", "10" }; // Для 4 переменных (Греевский код)
+            return new[] { "00", "01", "11", "10" };
         else
             throw new ArgumentException("Неподдерживаемое количество строк");
     }

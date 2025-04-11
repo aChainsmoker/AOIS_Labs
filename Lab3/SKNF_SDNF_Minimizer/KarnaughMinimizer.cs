@@ -9,13 +9,27 @@ public partial class Minimizer
         List<List<string>> parsedSDNF = ParseFormule(sdnf);
         List<char> variableOrder = GetVariableOrder(parsedSDNF); 
         int n = variableOrder.Count;
-        if (n > 4) throw new ArgumentException("Supported up to 4 variables");
+        if (n > 5) throw new ArgumentException("Supported up to 5 variables");
 
         List<List<int>> cases = CaseGenerator.GenerateCases(n);
         var casesValuesPairs = FindSDNFValues(cases, parsedSDNF, variableOrder);
         int[,] kmap = BuildKarnaughMap(casesValuesPairs, n);
         IOSystem.PrintKarnaughMap(kmap);
         return MinimizeKarnaughToDNF(kmap, n, variableOrder);
+    }
+
+    public string MinimizeSKNFByKarnaugh(string sknf)
+    {
+        List<List<string>> parsedSKNF = ParseFormule(sknf);
+        List<char> variableOrder = GetVariableOrder(parsedSKNF);
+        int n = variableOrder.Count;
+        if (n > 5) throw new ArgumentException("Поддерживается до 5 переменных"); 
+
+        List<List<int>> cases = CaseGenerator.GenerateCases(n);
+        var casesValuesPairs = FindSKNFValues(cases, parsedSKNF, variableOrder);
+        int[,] kmap = BuildKarnaughMap(casesValuesPairs, n);
+        IOSystem.PrintKarnaughMap(kmap);
+        return MinimizeKarnaughToCNF(kmap, n, variableOrder);
     }
 
     private List<char> GetVariableOrder(List<List<string>> parsedFormule)
@@ -72,7 +86,8 @@ public partial class Minimizer
             case 2: rows = 2; cols = 2; break;
             case 3: rows = 2; cols = 4; break;
             case 4: rows = 4; cols = 4; break;
-            default: throw new ArgumentException("Поддерживается до 4 переменных");
+            case 5: rows = 4; cols = 8; break;
+            default: throw new ArgumentException("Поддерживается до 5 переменных");
         }
 
         int[,] kmap = new int[rows, cols];
@@ -97,13 +112,13 @@ public partial class Minimizer
         if (n == 1) return 0;
         if (n == 2) return values[0];
         if (n == 3) return values[0];
-        if (n == 4)
+        if (n == 4 || n == 5)
         {
             int a = values[0];
             int b = values[1];
             return GetGrayCode((a << 1) | b);
         }
-        throw new ArgumentException("Unsupported amount of Variable");
+        throw new ArgumentException("Unsupported amount of variables");
     }
 
     private int GetColIndex(List<int> values, int n)
@@ -114,15 +129,28 @@ public partial class Minimizer
         {
             int b = values[1];
             int c = values[2];
-            return GetGrayCode((b << 1) | c);
+            int binaryValue = (b << 1) | c;
+            int[] grayOrder = { 0, 1, 3, 2 };
+            return Array.IndexOf(grayOrder, binaryValue);
         }
         if (n == 4)
         {
             int c = values[2];
             int d = values[3];
-            return GetGrayCode((c << 1) | d);
+            int binaryValue = (c << 1) | d;
+            int[] grayOrder = { 0, 1, 3, 2 };
+            return Array.IndexOf(grayOrder, binaryValue);
         }
-        throw new ArgumentException("Unsupported amount of Variable");
+        if (n == 5)
+        {
+            int c = values[2];
+            int d = values[3];
+            int e = values[4];
+            int binaryValue = (c << 2) | (d << 1) | e;
+            int[] grayOrder = { 0, 1, 3, 2, 6, 7, 5, 4 }; 
+            return Array.IndexOf(grayOrder, binaryValue); 
+        }
+        throw new ArgumentException("Unsupported amount of variables");
     }
 
     private List<List<int>> FindKarnaughGroups(int[,] kmap, int targetValue, int n)
@@ -176,68 +204,174 @@ public partial class Minimizer
             }
         }
 
+        if (n == 5)
+        {
+            groups.AddRange(FindAdditionalGroupsByMinglingMaps( new int[] {0,3,4,7}, targetValue, kmap, new List<Tuple<int, int>>() {new(0,0), new(1,3), new(2,4), new(3,7)}));
+            groups.AddRange(FindAdditionalGroupsByMinglingMaps( new int[] {1,2,5,6}, targetValue, kmap, new List<Tuple<int, int>>() {new(0,1), new(1,2), new(2,5), new(3,6)}));
+        }
         return FilterGroups(groups, kmap, targetValue);
+    }
+
+    private List<List<int>>  FindAdditionalGroupsByMinglingMaps(int[] colIndexesForSubMap, int targetValue, int [,] kmap, List<Tuple<int, int>> translationList)
+    {
+        int [,] subKMnap = new int[4, 4];
+            
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                subKMnap[j, i] = kmap[j, colIndexesForSubMap[i]];
+            }
+        }
+        List<List<int>> additionalGroups =  FindKarnaughGroups(subKMnap, targetValue, 4);
+        TranslateCoordinatesFromSubMapToGeneralMap(additionalGroups, translationList);
+        return additionalGroups;
+    }
+
+    private void TranslateCoordinatesFromSubMapToGeneralMap(List<List<int>> subGroups, List<Tuple<int, int>> translationList)
+    {
+        for (int i = 0; i < subGroups.Count; i++)
+        {
+            for (int j = 0; j < subGroups[i].Count; j++)
+            {
+                if ((j + 1) % 2 == 0)
+                {
+                    foreach (var rule in translationList)
+                    {
+                        if (subGroups[i][j] == rule.Item1)
+                        {
+                            subGroups[i][j] = rule.Item2;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private List<Tuple<int, int>> GetPossibleGroupSizes(int rows, int cols)
     {
         var sizes = new List<Tuple<int, int>>();
         int[] rowSizes = rows == 1 ? new[] { 1 } : new[] { 1, 2, 4 }.Where(x => x <= rows).ToArray();
-        int[] colSizes = new[] { 1, 2, 4 }.Where(x => x <= cols).ToArray();
+        int[] colSizes = new[] { 1, 2, 4, 8 }.Where(x => x <= cols).ToArray();
 
         foreach (int r in rowSizes)
-            foreach (int c in colSizes)
-                if (r * c >= 1)
-                    sizes.Add(Tuple.Create(r, c));
+        foreach (int c in colSizes)
+            if (r * c >= 1)
+                sizes.Add(Tuple.Create(r, c));
 
         return sizes;
     }
 
     private List<List<int>> FilterGroups(List<List<int>> groups, int[,] kmap, int targetValue)
+{
+    var filteredGroups = new List<List<int>>();
+    var sortedGroups = groups.OrderByDescending(g => g.Count / 2).ToList();
+
+    foreach (var group in sortedGroups)
     {
-        var filteredGroups = new List<List<int>>();
-        var sortedGroups = groups.OrderByDescending(g => g.Count / 2).ToList();
-
-        foreach (var group in sortedGroups)
-        {
-            bool isSubset = filteredGroups.Any(existing => IsSubset(group, existing));
-            if (!isSubset)
-                filteredGroups.Add(group);
-        }
-
-        for (int i = 0; i < filteredGroups.Count; i++)
-        {
-            if (IsCoveredByUnion(filteredGroups[i], filteredGroups, kmap, targetValue))
-            {
-                filteredGroups.RemoveAt(i);
-                i--;
-            }
-        }
-        return filteredGroups;
+        bool isSubset = filteredGroups.Any(existing => IsSubset(group, existing));
+        if (!isSubset)
+            filteredGroups.Add(group);  
     }
+
+    int n = kmap.GetLength(1) == 8 ? 5 : 4; 
+    if (n == 5)
+    {
+        filteredGroups = FilterGroupsForFiveVariables(filteredGroups, kmap);
+    }
+
+    for (int i = 0; i < filteredGroups.Count; i++)
+    {
+        if (IsCoveredByUnion(filteredGroups[i], filteredGroups))
+        {
+            filteredGroups.RemoveAt(i);
+            i--;
+        }
+    }
+    return filteredGroups;
+}
+
+private List<List<int>> FilterGroupsForFiveVariables(List<List<int>> groups, int[,] kmap)
+{
+    var validGroups = new List<List<int>>();
+    int rows = kmap.GetLength(0);
+    int cols = kmap.GetLength(1); 
+
+    foreach (var group in groups)
+    {
+        var uniqueCols = group.Where((x, idx) => idx % 2 == 1).Distinct().ToList();
+        var uniqueRows = group.Where((x, idx) => idx % 2 == 0).Distinct().ToList();
+
+        bool isValid = true;
+
+        if ((uniqueCols.Contains(0) || uniqueCols.Contains(1) || uniqueCols.Contains(2) || uniqueCols.Contains(3)) && (uniqueCols.Contains(4) || uniqueCols.Contains(5) || uniqueCols.Contains(6) || uniqueCols.Contains(7)))
+        {
+            var leftCols = uniqueCols.Where(c => c < 4).ToList();
+            var rightCols = uniqueCols.Where(c => c >= 4).ToList();
+
+            bool leftValid = CheckSubGroupValidity(uniqueRows, leftCols);
+            bool rightValid = CheckSubGroupValidity(uniqueRows, rightCols);
+
+            isValid = leftValid && rightValid;
+        }
+        else
+        {
+            isValid = CheckSubGroupValidity(uniqueRows, uniqueCols);
+        }
+
+        if (isValid)
+            validGroups.Add(group);
+    }
+
+    return validGroups;
+}
+
+private bool CheckSubGroupValidity(List<int> uniqueRows, List<int> uniqueCols)
+{
+    if (!uniqueCols.Any() && !uniqueRows.Any()) return false;
+
+    int rowCount = uniqueRows.Count;
+    int colCount = uniqueCols.Count;
+
+    bool isPowerOfTwo(int x) => x > 0 && (x & (x - 1)) == 0;
+
+    return isPowerOfTwo(rowCount) && isPowerOfTwo(colCount);
+}
 
     private bool IsSubset(List<int> group, List<int> superGroup)
     {
-        var groupCells = Enumerable.Range(0, group.Count / 2).Select(i => Tuple.Create(group[i * 2], group[i * 2 + 1])).ToHashSet();
-        var superCells = Enumerable.Range(0, superGroup.Count / 2).Select(i => Tuple.Create(superGroup[i * 2], superGroup[i * 2 + 1])).ToHashSet();
-        return groupCells.IsSubsetOf(superCells);
+        List<Tuple<int, int>> groupPairs = new List<Tuple<int, int>>();
+        for (int i = 0; i < group.Count; i += 2)
+            groupPairs.Add(new Tuple<int, int>(group[i], group[i + 1]));
+        
+        List<Tuple<int, int>> superGroupPairs = new List<Tuple<int, int>>();
+        for (int i = 0; i < superGroup.Count; i += 2)
+            superGroupPairs.Add(new Tuple<int, int>(superGroup[i], superGroup[i + 1]));
+        
+        if(groupPairs.All(g=>superGroupPairs.Contains(g)))
+            return true;
+        return false;
     }
 
-    private bool IsCoveredByUnion(List<int> group, List<List<int>> allGroups, int[,] kmap, int targetValue)
+    private bool IsCoveredByUnion(List<int> group, List<List<int>> allGroups)
     {
-        var groupCells = Enumerable.Range(0, group.Count / 2).Select(i => Tuple.Create(group[i * 2], group[i * 2 + 1])).ToHashSet();
-        var unionCells = new HashSet<Tuple<int, int>>();
+        List<Tuple<int, int>> groupPairs = new List<Tuple<int, int>>();
+        for (int i = 0; i < group.Count; i += 2)
+            groupPairs.Add(new Tuple<int, int>(group[i], group[i + 1]));
+        
+        List<Tuple<int, int>> unitedGroups = new List<Tuple<int, int>>();
         foreach (var other in allGroups)
         {
             if (other == group) continue;
             for (int i = 0; i < other.Count; i += 2)
-                unionCells.Add(Tuple.Create(other[i], other[i + 1]));
+                unitedGroups.Add(new Tuple<int, int>(other[i], other[i + 1]));
         }
 
-        foreach (var cell in groupCells)
-            if (!unionCells.Contains(cell) && kmap[cell.Item1, cell.Item2] == targetValue)
-                return false;
-        return true;
+
+        if(groupPairs.All(g=>unitedGroups.Contains(g)))
+                return true;
+        return false;
     }
 
     private string MinimizeKarnaughToDNF(int[,] kmap, int n, List<char> variableOrder)
@@ -296,6 +430,16 @@ public partial class Minimizer
             values.Add(cd.Item1);
             values.Add(cd.Item2);
         }
+        else if (n == 5)
+        {
+            var ab = GetABFromRow(row);
+            values.Add(ab.Item1);
+            values.Add(ab.Item2);
+            var cde = GetCDEFromColumn(col);
+            values.Add(cde.Item1);
+            values.Add(cde.Item2);
+            values.Add(cde.Item3);
+        }
         return values;
     }
 
@@ -325,18 +469,20 @@ public partial class Minimizer
         }
     }
     
-    public string MinimizeSKNFByKarnaugh(string sknf)
+    private Tuple<int, int, int> GetCDEFromColumn(int col)
     {
-        List<List<string>> parsedSKNF = ParseFormule(sknf);
-        List<char> variableOrder = GetVariableOrder(parsedSKNF);
-        int n = variableOrder.Count;
-        if (n > 4) throw new ArgumentException("Поддерживается до 4 переменных");
-
-        List<List<int>> cases = CaseGenerator.GenerateCases(n);
-        var casesValuesPairs = FindSKNFValues(cases, parsedSKNF, variableOrder);
-        int[,] kmap = BuildKarnaughMap(casesValuesPairs, n);
-        IOSystem.PrintKarnaughMap(kmap);
-        return MinimizeKarnaughToCNF(kmap, n, variableOrder);
+        switch (col)
+        {
+            case 0: return Tuple.Create(0, 0, 0);
+            case 1: return Tuple.Create(0, 0, 1);
+            case 2: return Tuple.Create(0, 1, 1);
+            case 3: return Tuple.Create(0, 1, 0);
+            case 4: return Tuple.Create(1, 1, 0);
+            case 5: return Tuple.Create(1, 1, 1);
+            case 6: return Tuple.Create(1, 0, 1);
+            case 7: return Tuple.Create(1, 0, 0);
+            default: throw new ArgumentException("Invalid column index for 5 variables");
+        }
     }
 
     private Dictionary<List<int>, int> FindSKNFValues(List<List<int>> cases, List<List<string>> parsedSKNF, List<char> variableOrder)

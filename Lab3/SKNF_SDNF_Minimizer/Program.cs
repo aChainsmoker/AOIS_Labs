@@ -3,9 +3,9 @@
 namespace SKNF_SDNF_Minimizer;
 
 class Program
-{
-    // CДНФ (!a/\!b/\c)\/(!a/\b/\!c)\\/(!a/\b/\c)\/(a/\b/\!c)   
-    // СКНФ (a\/b\/c)/\(!a\/b\/c)/\(!a\/b\/!c)/\(!a\/!b\/!c)
+{   //!a|!b|!c|!d|!e
+    //a|b|c|d|e
+    //a&b&c&!d&!e
     static void Main(string[] args)
     {
         while (true)
