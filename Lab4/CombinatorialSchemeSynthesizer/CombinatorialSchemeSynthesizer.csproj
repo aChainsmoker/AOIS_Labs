@@ -9,8 +9,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Lab1\BinaryNumbers\BinaryNumbers.csproj" />
-      <ProjectReference Include="..\..\SKNF_SDNF\SKNF_SDNF\SKNF_SDNF.csproj" />
-      <ProjectReference Include="..\..\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer.csproj" />
+      <ProjectReference Include="..\..\Lab2\SKNF_SDNF\SKNF_SDNF.csproj" />
+      <ProjectReference Include="..\..\Lab3\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer.csproj" />
     </ItemGroup>
 
 </Project>
