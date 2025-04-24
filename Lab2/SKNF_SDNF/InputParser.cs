@@ -2,7 +2,7 @@
 
 public class InputParser
 {
-     private readonly char[] _operations = new char[] { '&', '|', '!', '>', '~' };
+     private readonly char[] _operations = new char[] { '&', '|', '!', '>', '~', '^' };
      private List<char> _letters = new List<char>();
      private Dictionary<string, int> _values = new Dictionary<string, int>();
      
@@ -170,6 +170,8 @@ public class InputParser
                          return 1;
                     else 
                          return 0;
+               case '^':
+                    return (value1 != value2) ? 1 : 0;
                default: 
                     return -1;
           }

@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SKNF_SDNF\SKNF_SDNF.csproj" />
+      <ProjectReference Include="..\..\Lab2\SKNF_SDNF\SKNF_SDNF.csproj" />
     </ItemGroup>
 
 </Project>

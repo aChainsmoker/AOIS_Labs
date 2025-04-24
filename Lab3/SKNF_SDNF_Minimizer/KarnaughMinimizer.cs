@@ -23,7 +23,7 @@ public partial class Minimizer
         List<List<string>> parsedSKNF = ParseFormule(sknf);
         List<char> variableOrder = GetVariableOrder(parsedSKNF);
         int n = variableOrder.Count;
-        if (n > 5) throw new ArgumentException("Поддерживается до 5 переменных"); 
+        if (n > 5) throw new ArgumentException("Поддерживается до 5 переменных");
 
         List<List<int>> cases = CaseGenerator.GenerateCases(n);
         var casesValuesPairs = FindSKNFValues(cases, parsedSKNF, variableOrder);
@@ -77,7 +77,7 @@ public partial class Minimizer
         return results;
     }
 
-    private int[,] BuildKarnaughMap(Dictionary<List<int>, int> results, int n)
+    public int[,] BuildKarnaughMap(Dictionary<List<int>, int> results, int n)
     {
         int rows, cols;
         switch (n)
@@ -112,7 +112,7 @@ public partial class Minimizer
         if (n == 1) return 0;
         if (n == 2) return values[0];
         if (n == 3) return values[0];
-        if (n == 4 || n == 5)
+        if (n == 4 || n == 5) // Для 4 и 5 переменных строки одинаковы (A, B)
         {
             int a = values[0];
             int b = values[1];
@@ -146,9 +146,9 @@ public partial class Minimizer
             int c = values[2];
             int d = values[3];
             int e = values[4];
-            int binaryValue = (c << 2) | (d << 1) | e;
-            int[] grayOrder = { 0, 1, 3, 2, 6, 7, 5, 4 }; 
-            return Array.IndexOf(grayOrder, binaryValue); 
+            int binaryValue = (c << 2) | (d << 1) | e; // Двоичное CDE
+            int[] grayOrder = { 0, 1, 3, 2, 6, 7, 5, 4 }; // Позиции в карте Карно
+            return Array.IndexOf(grayOrder, binaryValue); // Индекс столбца
         }
         throw new ArgumentException("Unsupported amount of variables");
     }
@@ -193,7 +193,8 @@ public partial class Minimizer
                     if (isValid)
                     {
                         List<int> coordinates = cells.SelectMany(cell => new[] { cell.Item1, cell.Item2 }).ToList();
-                        string key = string.Join(",", coordinates.OrderBy(x => x));
+                        string key = string.Join(";", cells.OrderBy(cell => cell.Item1).ThenBy(cell => cell.Item2)
+                            .Select(cell => $"{cell.Item1},{cell.Item2}"));
                         if (!uniqueGroups.Contains(key))
                         {
                             uniqueGroups.Add(key);
@@ -220,7 +221,7 @@ public partial class Minimizer
         {
             for (int j = 0; j < 4; j++)
             {
-                subKMnap[j, i] = kmap[j, colIndexesForSubMap[i]];
+                subKMnap[i, j] = kmap[j, colIndexesForSubMap[i]];
             }
         }
         List<List<int>> additionalGroups =  FindKarnaughGroups(subKMnap, targetValue, 4);
@@ -274,8 +275,8 @@ public partial class Minimizer
         if (!isSubset)
             filteredGroups.Add(group);  
     }
-
-    int n = kmap.GetLength(1) == 8 ? 5 : 4; 
+    
+    int n = kmap.GetLength(1) == 8 ? 5 : 4;
     if (n == 5)
     {
         filteredGroups = FilterGroupsForFiveVariables(filteredGroups, kmap);
@@ -291,12 +292,12 @@ public partial class Minimizer
     }
     return filteredGroups;
 }
-
+    
 private List<List<int>> FilterGroupsForFiveVariables(List<List<int>> groups, int[,] kmap)
 {
     var validGroups = new List<List<int>>();
-    int rows = kmap.GetLength(0);
-    int cols = kmap.GetLength(1); 
+    int rows = kmap.GetLength(0); // 4
+    int cols = kmap.GetLength(1); // 8
 
     foreach (var group in groups)
     {
@@ -518,7 +519,7 @@ private bool CheckSubGroupValidity(List<int> uniqueRows, List<int> uniqueCols)
         return results;
     }
 
-    private string MinimizeKarnaughToCNF(int[,] kmap, int n, List<char> variableOrder)
+    public string MinimizeKarnaughToCNF(int[,] kmap, int n, List<char> variableOrder)
     {
         List<List<int>> groups = FindKarnaughGroups(kmap, 0, n);
         List<string> terms = new List<string>();
