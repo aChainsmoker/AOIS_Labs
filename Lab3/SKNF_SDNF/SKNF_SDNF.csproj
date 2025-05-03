@@ -7,8 +7,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\SKNF_SDNF\SKNF_SDNF.csproj" />
-    </ItemGroup>
-
 </Project>

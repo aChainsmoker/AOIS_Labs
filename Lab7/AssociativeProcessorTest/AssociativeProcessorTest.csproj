@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -13,12 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer.csproj" />
+    <ProjectReference Include="..\AssociativeProcessor\AssociativeProcessor.csproj" />
+    <ProjectReference Include="..\BinaryNumbers\BinaryNumbers.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-      <ProjectReference Include="..\..\SKNF_SDNF\SKNF_SDNF\SKNF_SDNF.csproj" />
-    </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />

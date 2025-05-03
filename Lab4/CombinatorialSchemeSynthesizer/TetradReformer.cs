@@ -1,7 +1,6 @@
 ﻿using Lab1;
 using SKNF_SDNF_Minimizer;
 using SKNF_SDNF;
-using Lab1;
 
 namespace CombinatorialSchemeSynthesizer;
 

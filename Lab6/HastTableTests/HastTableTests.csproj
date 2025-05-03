@@ -13,12 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer.csproj" />
+    <ProjectReference Include="..\HashTable\HashTable.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-      <ProjectReference Include="..\..\SKNF_SDNF\SKNF_SDNF\SKNF_SDNF.csproj" />
-    </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />

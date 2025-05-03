@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SKNF_SDNF\SKNF_SDNF.csproj" />
+      <ProjectReference Include="..\SKNF_SDNF_Minimizer\SKNF_SDNF_Minimizer.csproj" />
     </ItemGroup>
 
 </Project>
